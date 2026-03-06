@@ -1,10 +1,11 @@
 package org.example.springbootassignment.enums;
 
 public enum AccountType {
-    SavingsAccount("Savings Account"),
-    CurrentAccounts("Current Accounts"),
-    FixedDeposits("Fixed Deposits"),
-    Investment("Investment");
+    SAVINGSACCOUNT("Savings Account"),
+    CURRENTACCOUNT("Current Accounts"),
+    FIXEDDEPOSITE("Fixed Deposits"),
+    INVESETMENT("Investment");
+
 
 
 

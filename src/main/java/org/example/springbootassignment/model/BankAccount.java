@@ -1,82 +1,59 @@
 package org.example.springbootassignment.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.example.springbootassignment.enums.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Builder
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
+
 public class BankAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "account_number_seq")
-    private  long accountNumber;
-    private String holderName;
+    private long accountNumber;
+
+    @Column(nullable = false)
     private double accountBalance;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private AccountType accountType;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "customer_id",nullable = false)
     private Customer owner;
+
     @OneToMany( cascade = CascadeType.ALL, orphanRemoval = true,mappedBy = "bankAccount")
-    private List<Transactions> transactionHistory;
+    @Builder.Default
+    private List<Transactions> transactionHistory = new ArrayList<>();
 
-    //for later use - open an account for an existing customer
+    @Column(nullable = false)
+    @Builder.Default
+    boolean isActive= true;
 
-    public BankAccount( Customer customer,String holderName, double accountBalance, AccountType accountType) {
-        this.holderName = holderName;
-        this.accountBalance = accountBalance;
-        this.accountType = accountType;
-        this.owner = customer;
-        this.transactionHistory = new ArrayList<>();
-    }
-    public BankAccount( ) {
-        this.transactionHistory = new ArrayList<>();
-    }
+    @CreatedDate
+    @Column(updatable = false, nullable = false)
+    private LocalDateTime createdAt;
 
-    @SequenceGenerator(
-            name = "account_number_seq",
-            sequenceName = "account_number_seq",
-            allocationSize = 1,
-            initialValue = 1000000000
-    )
-    public long getAccountNumber() {
-        return accountNumber;
-    }
-
-
-    public String getHolderName() {
-        return holderName;
-    }
-
-    public void setHolderName(String holderName) {
-        this.holderName = holderName;
-    }
-
-    public double getAccountBalance() {
-        return accountBalance;
-    }
-
-    public void setAccountBalance(double accountBalance) {
-        this.accountBalance = accountBalance;
-    }
-
-    public AccountType getAccountType() {
-        return accountType;
-    }
-
-    public void setAccountType(AccountType accountType) {
-        this.accountType = accountType;
-    }
-
-    public Customer getOwner() {
-        return owner;
-    }
-
-    public List<Transactions> getTransactionHistory() {
-        return transactionHistory;
-    }
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
 
 
     public boolean deposit(double amount) {
@@ -86,7 +63,7 @@ public class BankAccount {
         }
 
         this.accountBalance += amount;
-        Transactions transaction = new Transactions( amount, TransactionType.Credit);
+        Transactions transaction = new Transactions( amount, TransactionType.CREDIT);
         transactionHistory.add(transaction);
 
         System.out.println("Successfully deposited: " + amount);
@@ -107,7 +84,7 @@ public class BankAccount {
         }
 
         this.accountBalance -= amount;
-        Transactions transaction = new Transactions( amount, TransactionType.Debit);
+        Transactions transaction = new Transactions( amount, TransactionType.DEBIT);
         transactionHistory.add(transaction);
 
         System.out.println("Successfully withdrawn: " + amount);
@@ -119,7 +96,7 @@ public class BankAccount {
     public void viewTransactionHistory() {
         System.out.println("\n" + "-".repeat(100));
         System.out.println("TRANSACTION HISTORY - " + accountNumber);
-        System.out.println("Holder: " + holderName);
+        System.out.println("Holder: " + owner.getCustomerName());
         System.out.println("-".repeat(100));
 
         if (transactionHistory.isEmpty()) {
@@ -149,7 +126,7 @@ public class BankAccount {
     public String toString() {
         return "BankAccount{" +
                 "accountNumber=" + accountNumber +
-                ", holderName='" + holderName + '\'' +
+                ", holderName='" + owner.getCustomerName() + '\'' +
                 ", accountBalance=" + accountBalance +
                 ", accountType=" + accountType +
                 '}';

@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
-
+    Customer save(Customer customer);
     Optional<Customer> findByNicNumber(String nicNumber);
 
     Optional<Customer> findByIsActive(boolean isActive);

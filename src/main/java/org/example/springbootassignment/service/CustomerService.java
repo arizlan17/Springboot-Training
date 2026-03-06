@@ -56,11 +56,10 @@ private final CustomerRepository customerRepository;
 
 
     public void deleteCustomer( String Nic){
-        Customer deletedCustomer = customerRepository.findByNicNumber(Nic).orElseThrow(()-> new RuntimeException("Customer with NIC: " + Nic + " not found"));
+        Customer deletedCustomer = customerRepository.findByNicNumber(Nic)
+                .orElseThrow(()-> new RuntimeException("Customer with NIC: " + Nic + " not found"));
         deletedCustomer.setActive(false);
         customerRepository.save(deletedCustomer);
     }
-
-
 
 }
